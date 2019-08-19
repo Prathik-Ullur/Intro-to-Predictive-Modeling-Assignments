@@ -1,0 +1,357 @@
+---
+title: "Visual story telling part 1: Green Buildings"
+output:
+  github_document:
+    fig_width: 4.5
+    fig_height: 3
+---
+
+```{r echo=FALSE, results='hide',message=FALSE}
+rm(list=ls())
+
+library(mosaic)
+library(tidyverse)
+
+
+
+Building_Data = read.csv(file="/Users/maverick/Documents/MSBA SUMMER SEM/Predictive modelling 2/project/greenbuildings.csv", header=TRUE, sep=",")
+
+
+```
+
+### Let us take a look at the Data by running str(Building_Data). 
+
+We also ran is.na(Building_Data) to take a look at any null values. We see that empl_gr has 71 null values.  
+
+
+```{r echo=FALSE,message=FALSE}
+
+str(Building_Data)
+summary(is.na(Building_Data))
+
+
+```
+
+
+
+### We see that the leasing rate is 0 for a few buildings and hence we shall not be considering them in our dataset.
+
+We shall now remove all buildings with Leasing Rate less than 15%.  
+
+
+```{r echo=FALSE, message=FALSE}
+ggplot(data=Building_Data, aes(Building_Data$leasing_rate)) + 
+  geom_histogram() +
+geom_vline(data=Building_Data, aes(xintercept = median(Building_Data$leasing_rate)), colour="red") 
+
+
+Building_Data_removed_15=Building_Data[which(!Building_Data$leasing_rate < 15), ] 
+
+
+ggplot(data=Building_Data_removed_15, aes(Building_Data_removed_15$leasing_rate)) + 
+  geom_histogram() +
+geom_vline(data=Building_Data_removed_15, aes(xintercept = median(Building_Data_removed_15$leasing_rate)), colour="red") 
+
+```
+
+
+
+
+```{r }
+
+
+
+median(Building_Data$leasing_rate)
+
+median(Building_Data_removed_15$leasing_rate)
+
+```
+```{r echo=FALSE, message=FALSE}
+Building_Data=Building_Data[which(!Building_Data$leasing_rate < 15), ] 
+```
+
+
+### Now let us consider green and non-green buildings seperately 
+
+
+
+```{r echo=FALSE, message=FALSE}
+
+green_buildings=Building_Data[which(Building_Data$green_rating == 1), ] 
+
+ggplot(data=green_buildings, aes(green_buildings$size)) + 
+  geom_histogram() +
+geom_vline(data=green_buildings, aes(xintercept = median(green_buildings$size)), colour="red") 
+
+
+
+non_green_buildings=Building_Data[which(!Building_Data$green_rating == 1), ] 
+
+ggplot(data=non_green_buildings, aes(non_green_buildings$size)) + 
+  geom_histogram() +
+geom_vline(data=non_green_buildings, aes(xintercept = median(non_green_buildings$size)), colour="red") 
+
+
+
+print(c('The median size for green buildings is : ',median(green_buildings$size)))
+
+print(c("The median size for non-green buildings is : ", median(non_green_buildings$size)))
+
+```
+
+
+
+
+
+```{r echo=FALSE, message=FALSE}
+ggplot(data=green_buildings, aes(green_buildings$stories)) + 
+  geom_histogram() +
+geom_vline(data=green_buildings, aes(xintercept = median(green_buildings$stories)), colour="red")
+
+
+ggplot(data=non_green_buildings, aes(non_green_buildings$stories)) + 
+  geom_histogram() +
+geom_vline(data=non_green_buildings, aes(xintercept = median(non_green_buildings$stories)), colour="red")
+
+
+
+print("The median stories for green buildings is : ")
+
+median(green_buildings$stories)
+
+
+print("The median stories for non-green buildings is : ")
+
+median(non_green_buildings$stories)
+
+
+
+```
+
+
+
+
+
+
+```{r echo=FALSE, message=FALSE}
+
+
+
+ggplot(data=green_buildings, aes(green_buildings$Rent)) + 
+  geom_histogram() +
+geom_vline(data=green_buildings, aes(xintercept = median(green_buildings$Rent)), colour="red") 
+
+ggplot(data=non_green_buildings, aes(non_green_buildings$Rent)) + 
+  geom_histogram() +
+geom_vline(data=non_green_buildings, aes(xintercept = median(non_green_buildings$Rent)), colour="red") 
+
+
+
+print("The median rent for green buildings is : ")
+
+median(green_buildings$Rent)
+
+
+print("The median rent for non-green buildings is : ")
+
+median(non_green_buildings$Rent)
+
+```
+
+
+```{r echo=FALSE, message=FALSE}
+
+
+
+ggplot(data = green_buildings) + 
+  geom_point(mapping = aes(x = size, y = Rent), colour = 'green',alpha = 6/10) +
+  geom_vline(data=green_buildings, aes(xintercept = median(green_buildings$size)), colour="red")
+
+
+ggplot(data = non_green_buildings) + 
+  geom_point(mapping = aes(x = size, y = Rent), colour = 'light blue') +
+  geom_vline(data=non_green_buildings, aes(xintercept = median(non_green_buildings$size)), colour="red")
+
+
+ggplot(data = green_buildings) + 
+  geom_point(mapping = aes(x = stories, y = Rent), colour = 'green',alpha = 6/10) +
+geom_vline(data=green_buildings, aes(xintercept = median(green_buildings$stories)), colour="red") 
+
+
+ggplot(data = non_green_buildings) + 
+  geom_point(mapping = aes(x = stories, y = Rent), colour = 'light blue') +
+geom_vline(data=non_green_buildings, aes(xintercept = median(non_green_buildings$stories)), colour="red") 
+
+
+
+```
+
+
+
+
+
+
+```{r echo=FALSE, message=FALSE}
+
+size_sum = Building_Data %>%
+  group_by(cluster)  %>%  # group the data points by model name
+  summarize(size2 = median(size))  
+
+
+
+ggplot(size_sum, aes(x=reorder(cluster, size2), y=size2)) + 
+  geom_bar(stat='identity') + 
+  coord_flip()+labs(x = "Cluster",y='Median Size')
+
+size_sum = Building_Data %>%
+  group_by(cluster)  %>%  # group the data points by model name
+  summarize(size2 = median(stories))  
+
+
+
+ggplot(size_sum, aes(x=reorder(cluster, size2), y=size2)) + 
+  geom_bar(stat='identity') + 
+  coord_flip()+labs(x = "Cluster",y='Median Stories')
+
+
+
+```
+
+
+From our initial analysis, we believe that it wouldnt be an accurate representation of the data to pick the median value of the entire dataset. This is because the question in context only refers to a building of size 250,000 sq.feet and 15 stories and hence it makes more sense to consider only clusters with median size and stories around those values while calculating the Rent 
+
+
+With this in mind, let us shrink the data to obtain buildings in clusters with median height to be around 250,000 and stories 15. From the problem statement, we know that the building is a new 15-story mixed-use building on East Cesar Chavez, just across I-35 from downtown. given that downtown is known to have more high rise buildings than the other parts of Austin, we beileive we should include only the subset of clusters with this median size and storey height.
+
+### Finding average median among green buildings of stories and size  
+
+```{r echo=FALSE, message=FALSE}
+
+
+average_median_stories=(aggregate(green_buildings$stories~green_buildings$cluster, data=green_buildings, median))
+
+
+average_median=(aggregate(green_buildings$size~green_buildings$cluster, data=green_buildings, median))
+
+
+```
+
+
+```{r}
+
+
+BD3=green_buildings[(average_median[2]>150000) & (average_median[2]<350000) & (average_median_stories[2]>11) & (average_median_stories[2]<30), ] 
+
+
+
+```
+
+
+```{r echo=FALSE, message=FALSE}
+
+
+ggplot(data=BD3, aes(BD3$size)) + 
+  geom_histogram() +
+geom_vline(data=BD3, aes(xintercept = median(BD3$size)), colour="red") +
+labs(x = "Cluster",y='Median Size of Green buildings')
+
+
+ggplot(data=BD3, aes(BD3$stories)) + 
+  geom_histogram() +
+geom_vline(data=BD3, aes(xintercept = median(BD3$stories)), colour="red") +
+labs(x = "Cluster",y='Median Stories of Green buildings')
+
+
+
+#We see that the size is not equal among the data and the median is in 128838sq feet, Hence we cannot take this data to perform our analysis. We need to take 
+
+
+```
+```{r echo=FALSE, message=FALSE}
+
+ggplot(data = BD3) + 
+  geom_point(mapping = aes(x = size, y = Rent, color = green_rating),colour='green') +
+  geom_vline(data=BD3, aes(xintercept = median(BD3$size)), colour="red") 
+
+ggplot(data = BD3) + 
+  geom_point(mapping = aes(x = stories, y = Rent, color = green_rating),colour='green') +
+  geom_vline(data=BD3, aes(xintercept = median(BD3$stories)), colour="red") 
+
+
+```
+
+
+```{r}
+
+ggplot(data=BD3, aes(BD3$Rent)) + 
+  geom_histogram() +
+geom_vline(data=BD3, aes(xintercept = median(BD3$Rent)), colour="red") 
+
+median(BD3$Rent)
+
+
+```
+
+
+#### From this we see that the rent is 31.45  
+
+
+### Now let us calculate for non-green buildings in the same cluster.
+
+
+
+
+```{r , message=FALSE}
+
+
+
+BD2_non_green=Building_Data[which(!Building_Data$green_rating == 1), ] 
+
+
+BD3_non_green=BD2_non_green[(average_median[2]>150000) & (average_median[2]<350000) & (average_median_stories[2]>11) & (average_median_stories[2]<30), ] 
+
+```
+
+We are now calculating the median Rent price for Non-green buildings in the clusters present with average size 250,000 and storey height 15.
+
+
+```{r echo=FALSE, message=FALSE}
+
+ggplot(data=BD3_non_green, aes(BD3_non_green$Rent)) + 
+  geom_histogram() +
+geom_vline(data=BD3_non_green, aes(xintercept = median(BD3_non_green$Rent)), colour="red") 
+
+median(BD3_non_green$Rent)
+
+```
+
+
+### Conclusion :
+
+ Median Rent for green buildings in clusters with median size = 250000 and median stories 15: 31.45 
+
+ Median Rent for non-green buildings in clusters with median size = 250000 and median stories 15: 25.48
+
+ Hence difference is : 31.45-25.48 = 5.97;  5.97*250,000=1,492,500  
+
+ Amount taken to construct 5,000,000;  Hence it is : 5,000,000/1,492,500  
+ **3.35 years to gain the money back**
+
+
+But let us see the median leasing rate : #92.285  
+
+
+```{r echo=FALSE, message=FALSE}
+
+
+ggplot(data=BD3, aes(BD3$leasing_rate)) + 
+  geom_histogram() +
+geom_vline(data=BD3, aes(xintercept = median(BD3$leasing_rate)), colour="red") 
+
+
+```
+
+
+3.35/92.285 = 3.63 years
+
+Even with a leasing rate of 92%, it shall take 3.63 years to earn back the money and the building will have an extra profit of $1,492,500 per year
