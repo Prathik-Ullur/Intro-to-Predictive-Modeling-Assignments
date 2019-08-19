@@ -61,7 +61,7 @@ see that empl\_gr has 71 null values.
 We shall now remove all buildings with Leasing Rate less than
 15%.
 
-![](Green_Buildngs_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->![](Green_Buildngs_files/figure-gfm/unnamed-chunk-3-2.png)<!-- -->
+![](Green_Buildings_files/figure-gfm/unnamed-chunk-3-1.png)<!-- -->![](Green_Buildings_files/figure-gfm/unnamed-chunk-3-2.png)<!-- -->
 
 ``` r
 median(Building_Data$leasing_rate)
@@ -77,7 +77,7 @@ median(Building_Data_removed_15$leasing_rate)
 
 ### Now let us consider green and non-green buildings seperately
 
-![](Green_Buildngs_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->![](Green_Buildngs_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
+![](Green_Buildings_files/figure-gfm/unnamed-chunk-6-1.png)<!-- -->![](Green_Buildings_files/figure-gfm/unnamed-chunk-6-2.png)<!-- -->
 
     ## [1] "The median size for green buildings is : "
     ## [2] "241199"
@@ -85,7 +85,7 @@ median(Building_Data_removed_15$leasing_rate)
     ## [1] "The median size for non-green buildings is : "
     ## [2] "123442"
 
-![](Green_Buildngs_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->![](Green_Buildngs_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
+![](Green_Buildings_files/figure-gfm/unnamed-chunk-7-1.png)<!-- -->![](Green_Buildings_files/figure-gfm/unnamed-chunk-7-2.png)<!-- -->
 
     ## [1] "The median stories for green buildings is : "
 
@@ -95,7 +95,7 @@ median(Building_Data_removed_15$leasing_rate)
 
     ## [1] 10
 
-![](Green_Buildngs_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->![](Green_Buildngs_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
+![](Green_Buildings_files/figure-gfm/unnamed-chunk-8-1.png)<!-- -->![](Green_Buildings_files/figure-gfm/unnamed-chunk-8-2.png)<!-- -->
 
     ## [1] "The median rent for green buildings is : "
 
@@ -105,9 +105,9 @@ median(Building_Data_removed_15$leasing_rate)
 
     ## [1] 25.06
 
-![](Green_Buildngs_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->![](Green_Buildngs_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->![](Green_Buildngs_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->![](Green_Buildngs_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
+![](Green_Buildings_files/figure-gfm/unnamed-chunk-9-1.png)<!-- -->![](Green_Buildings_files/figure-gfm/unnamed-chunk-9-2.png)<!-- -->![](Green_Buildings_files/figure-gfm/unnamed-chunk-9-3.png)<!-- -->![](Green_Buildings_files/figure-gfm/unnamed-chunk-9-4.png)<!-- -->
 
-![](Green_Buildngs_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->![](Green_Buildngs_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
+![](Green_Buildings_files/figure-gfm/unnamed-chunk-10-1.png)<!-- -->![](Green_Buildings_files/figure-gfm/unnamed-chunk-10-2.png)<!-- -->
 
 From our initial analysis, we believe that it wouldnt be an accurate
 representation of the data to pick the median value of the entire
@@ -131,8 +131,8 @@ height.
 BD3=green_buildings[(average_median[2]>150000) & (average_median[2]<350000) & (average_median_stories[2]>11) & (average_median_stories[2]<30), ] 
 ```
 
-![](Green_Buildngs_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->![](Green_Buildngs_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
-![](Green_Buildngs_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->![](Green_Buildngs_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
+![](Green_Buildings_files/figure-gfm/unnamed-chunk-13-1.png)<!-- -->![](Green_Buildings_files/figure-gfm/unnamed-chunk-13-2.png)<!-- -->
+![](Green_Buildings_files/figure-gfm/unnamed-chunk-14-1.png)<!-- -->![](Green_Buildings_files/figure-gfm/unnamed-chunk-14-2.png)<!-- -->
 
 ``` r
 ggplot(data=BD3, aes(BD3$Rent)) + 
@@ -142,7 +142,7 @@ geom_vline(data=BD3, aes(xintercept = median(BD3$Rent)), colour="red")
 
     ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
 
-![](Green_Buildngs_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
+![](Green_Buildings_files/figure-gfm/unnamed-chunk-15-1.png)<!-- -->
 
 ``` r
 median(BD3$Rent)
@@ -164,7 +164,7 @@ BD3_non_green=BD2_non_green[(average_median[2]>150000) & (average_median[2]<3500
 We are now calculating the median Rent price for Non-green buildings in
 the clusters present with average size 250,000 and storey height 15.
 
-![](Green_Buildngs_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
+![](Green_Buildings_files/figure-gfm/unnamed-chunk-17-1.png)<!-- -->
 
     ## [1] 25.48
 
@@ -183,7 +183,7 @@ Amount taken to construct 5,000,000; Hence it is : 5,000,000/1,492,500
 
 But let us see the median leasing rate : \#92.285
 
-![](Green_Buildngs_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
+![](Green_Buildings_files/figure-gfm/unnamed-chunk-18-1.png)<!-- -->
 
 3.35/92.285 = 3.63 years
 
