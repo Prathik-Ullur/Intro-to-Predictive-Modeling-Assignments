@@ -1,0 +1,189 @@
+---
+title: "Portfolio Modeling"
+output: github_document
+---
+
+### Loading all required libraries  
+
+```{r warning=FALSE}
+library(mosaic)
+library(quantmod)
+library(foreach)
+```
+
+### 1. Importing top 3 oil & gas ETF's - last 5 yrs data - Portfolio 1  
+### 2. Importing top 3 Building&Construction & top 2 Commodities ETF's - last 5 yrs data - Portfolio 2  
+### 3. Import top 7 Diversified Portfolio ETF's - last 5 yrs data - Portfolio 3  
+
+### Creating an all return matrix for all the 3 portfolios  
+
+```{r warning=FALSE, error=FALSE}
+
+# Import top 3 oil & gas ETF's - last 5 yrs data
+etf1 = c("USO", "UNG", "DBO")
+
+# Import top 3 Building&Construction & top 2 Commodities ETF's - last 5 yrs data
+etf2 = c("ITB", "XHB", "PKB","PDBC","DBC")
+
+# Import top 7 Diversified Portfolio ETF's - last 5 yrs data
+etf3 = c("AOR", "AOM", "AOA", "MDIV", "AOK", "IYLD", "GAL")
+
+#Getting data for past 5 years
+getSymbols(etf1, from = "2014-08-01")
+getSymbols(etf2, from = "2014-08-01")
+getSymbols(etf3, from = "2014-08-01")
+
+
+for(ticker in etf1) {
+	expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+	eval(parse(text=expr))
+}
+
+all_returns1 = cbind(	ClCl(USOa),
+								ClCl(UNGa),
+								ClCl(DBOa))
+
+# Creating all return matrix for Portfolio 1
+all_returns1 = as.matrix(na.omit(all_returns1))
+summary(all_returns1)
+
+for(ticker in etf2) {
+	expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+	eval(parse(text=expr))
+}
+
+all_returns2 = cbind(	ClCl(ITBa),
+								ClCl(XHBa),
+								ClCl(PKBa),
+								ClCl(PDBCa),
+								ClCl(DBCa))
+
+# Creating all return matrix for Portfolio 2
+all_returns2 = as.matrix(na.omit(all_returns2))
+summary(all_returns2)
+
+for(ticker in etf3) {
+	expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+	eval(parse(text=expr))
+}
+
+all_returns3 = cbind(	ClCl(AORa),
+								ClCl(AOMa),
+								ClCl(AOAa),
+								ClCl(MDIVa),
+								ClCl(AOKa),
+								ClCl(IYLDa),
+								ClCl(GALa))
+# Creating all return matrix for Portfolio 3
+all_returns3 = as.matrix(na.omit(all_returns3))
+summary(all_returns3)
+```
+
+### Calculating VAR for Portfolio 1  
+#### From the summary of returns, it seems ETF "UNG" has a neagtive mean and median return. Hence assigning weights as (0.4,0.2,0.4) to have lesser weights on "UNG"  
+
+```{r}
+
+# Monte Carlo Simulation to Calculate VAR for Portfolio 1
+initial_wealth = 100000
+# 5000 simulations
+sim1 = foreach(i=1:5000, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.4, 0.2, 0.4)
+	holdings = weights * total_wealth
+	n_days = 20
+	wealthtracker1 = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns1, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker1[today] = total_wealth
+		holdings = weights * total_wealth #re-balancing each day
+		
+	}
+	((wealthtracker1[20]-initial_wealth)*100)/initial_wealth
+	
+}
+sorted_sim_1=sort(sim1)
+VAR1=sorted_sim_1[250]
+VAR1
+
+```
+
+### Calculating VAR for Portfolio 2  
+#### From the summary of returns, it seems ETF "PDBC" and "DBC" hvae neagtive mean returns. Hence assigning the weights accordingly as (0.2,0.3,0.3,0.1,0.1) to have lesser weights on "PDBC" and "DBC"  
+
+```{r}
+
+# Monte Carlo Simulation to Calculate VAR for Portfolio 2
+initial_wealth = 100000
+#5000 Simulations
+sim2 = foreach(i=1:5000, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.2, 0.3, 0.3, 0.1, 0.1)
+	holdings = weights * total_wealth
+	n_days = 20 #20 trading day
+	wealthtracker2 = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns2, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker2[today] = total_wealth
+		holdings = weights * total_wealth #re-balancing each day
+		
+	}
+	((wealthtracker2[20]-initial_wealth)*100)/initial_wealth
+	
+}
+sorted_sim_2=sort(sim2)
+VAR2=sorted_sim_2[250]
+VAR2
+
+```
+
+### Calculating VAR for Portfolio 3  
+#### From the summary of returns, all ETF's have comparable returns. Hence assigning almost equal weights to them.  
+
+```{r}
+
+# Monte Carlo Simulation to Calculate VAR for Portfolio 3
+initial_wealth = 100000
+#5000 simulations
+sim3 = foreach(i=1:5000, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.15, 0.15, 0.15, 0.15,0.15,0.15,0.1)
+	holdings = weights * total_wealth
+	n_days = 20
+	wealthtracker3 = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns3, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker3[today] = total_wealth
+		holdings = weights * total_wealth #re-balancing each day
+		
+	}
+	((wealthtracker3[20]-initial_wealth)*100)/initial_wealth
+	
+}
+sorted_sim_3=sort(sim3)
+VAR3=sorted_sim_3[250]
+VAR3
+
+```
+
+```{r}
+print("Final Report")
+cat("\nPortfolio 1 containing top 3 oil & gas ETF's - ",etf1, "\n4-week (20 trading day) VAR at the 5% level = ", VAR1,"%")
+cat("\n\nPortfolio 2 containing top 3 Building&Construction & top 2 Commodities ETF's - ",etf2, "\n4-week (20 trading day) VAR at the 5% level = ", VAR2,"%")
+cat("\n\nPortfolio 3 containing top 7 Diversified Portfolio ETF's - ",etf3, "\n4-week (20 trading day) VAR at the 5% level = ", VAR3,"%")
+```
+
+### **Final Report**
+
+
+Portfolio  | ETF List                                          | ETF Category                                     | 4-week VAR
+---------  | ---------------                                   | ------------------                               | -------------
+ 1         | "USO", "UNG", "DBO"                               | Top 3 oil & gas                                  | -14.64 %
+ 2         | "ITB", "XHB", "PKB","PDBC","DBC"                  | Top 3 Building&Construction & top 2 Commodities  |  -6.68 %
+ 3         | "AOR", "AOM", "AOA", "MDIV", "AOK", "IYLD", "GAL" | Top 7 Diversified Portfolios                     |  -2.79 %
