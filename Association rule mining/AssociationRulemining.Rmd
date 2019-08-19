@@ -1,0 +1,186 @@
+---
+title: "Association Rule Mining"
+author: "Namita"
+date: "August 17, 2019"
+output: html_document
+---
+
+The dataset "Groceries" contains all transactions that consists of items bought in the store by several customers over a period of time. As business analysts, we  hope to identify trends in customer purchase behavior by analyzing their basket data.  
+
+**Association Rule Mining**  
+Association Rule Mining is used when you want to find an association between different objects in a set, find frequent patterns in a transaction database, relational databases or any other information repository. The applications of Association Rule Mining are found in Marketing, Basket Data Analysis (or Market Basket Analysis) in retailing, clustering and classification. It can tell you what items do customers frequently buy together by generating a set of rules called Association Rules. In simple words, it gives you output as rules in form of this then that.  
+
+```{r echo = FALSE, include = FALSE}
+#install and load package arules
+#install.packages("arules")
+library(arules)
+#install and load arulesViz
+#install.packages("arulesViz")
+library(arulesViz)
+#install and load tidyverse
+#install.packages("tidyverse")
+library(tidyverse)
+#install and load readxml
+#install.packages("readxml")
+#install and load knitr
+#install.packages("knitr")
+library(knitr)
+#load ggplot2 as it comes in tidyverse
+library(ggplot2)
+#install and load lubridate
+#install.packages("lubridate")
+library(lubridate)
+#install and load plyr
+#install.packages("plyr")
+library(plyr)
+library(dplyr)
+
+library(tidyverse)
+library(arules)  # has a big ecosystem of packages built around it
+library(arulesViz)
+
+#Reading in the data
+setwd("C:/Users/namit/Desktop/MSBA/Intro to Predictive Analytics/STA380-master/data")
+
+```
+
+## Pre-processing data to make the data readable for the Association Rules Mining. 
+
+The functions in the _arules_ package only accept transaction data. Hence the flat file needs to processed to ensure that the input to the functions is as expected. 
+```{r}
+retail = scan('C:/Users/namit/Desktop/MSBA/Intro to Predictive Analytics/STA380-master/data/groceries.txt',what="", sep='\n')
+head(retail)
+
+str(retail)
+summary(retail)
+
+groceries = strsplit(retail,",")
+
+groctrans=as(groceries, "transactions")
+summary(groctrans)
+
+```
+Now we want to try to understand which  items in the baskets are most frequently purchased. For this, we plot the itemFrequencyPlot calculated with type 'absolute' and 'relative'. If absolute it will plot numeric frequencies of each item independently. If relative it will plot how many times these items have appeared as compared to others.
+
+```{r}
+# Create an item frequency plot for the top 20 items
+if (!require("RColorBrewer")) {
+  # install color package of R
+install.packages("RColorBrewer")
+#include library RColorBrewer
+library(RColorBrewer)
+}
+itemFrequencyPlot(groctrans,topN=20,type="absolute",col=brewer.pal(8,'Pastel2'), main="Absolute Item Frequency Plot")
+
+itemFrequencyPlot(groctrans,topN=20,type="relative",col=brewer.pal(8,'Pastel2'),main="Relative Item Frequency Plot")
+
+```
+
+
+From the graphs above, it is evident that the top 5 items being purchased are:  
+1. whole milk   
+2. vegetables  
+3. rolls/buns  
+4. soda  
+5. yogurt  
+
+(Basic survival kit!)
+
+The next step is generating rules using the Apriori Algorithm! We can mine rules using **apriori()** function from the **arules** package.
+
+The apriori will take 'groctrans' as the transaction object on which mining is to be applied. parameter will allow you to set min_sup and min_confidence. The default values for parameter are minimum support of 0.001, the minimum confidence of 0.8, maximum of 10 items (maxlen).
+
+We arrived at these values by trial and error. While a lower confidence value helped result in more number of mining rules, we wanted to make sure that we are confident with the predictions we were making from the rules.
+
+```{r}
+association.rules <- apriori(groctrans, parameter = list(supp=0.001, conf=0.8,maxlen=10))
+summary(association.rules)
+
+inspect(association.rules[1:10])
+```
+From the above information, we can deduce that 100% of the customers who bought Rice and sugar also bought Whole Milk.  
+The confidence values of other rules in the above summary are also pretty high (>0.8).
+
+You can also remove redundant rules by creating a subset of unique rules.
+
+```{r}
+# Min Support as 0.005, confidence as 0.8.
+association.rules <- apriori(groctrans, parameter = list(supp=0.001, conf=0.8,maxlen=10))
+summary(association.rules)
+
+inspect(association.rules[1:10])
+
+subset.rules <- which(colSums(is.subset(association.rules, association.rules)) > 1) # get subset rules in vector
+length(subset.rules)  #410 ----> 91
+
+subset.association.rules. <- association.rules[-subset.rules] # remove subset rules.
+
+```
+
+## Finding rules related to a given item:
+
+We can find trends in the way people shop ingredients by finding relationships between the different association rules.  
+
+```{r}
+# What did people buy before buying beer?
+beer.association.rules <- apriori(groctrans, parameter = list(supp=0.001, conf=0.8),appearance = list(default="lhs",rhs="bottled beer"))
+
+inspect(head(beer.association.rules))
+
+# What did people buy before buying milk?
+wholemilk.association.rules <- apriori(groctrans, parameter = list(supp=0.001, conf=0.6),appearance = list(default="lhs",rhs="whole milk"))
+
+inspect(head(wholemilk.association.rules))
+
+# What did people buy along with milk?
+milk.association.rules <- apriori(groctrans, parameter = list(supp=0.001, conf=0.8),appearance = list(lhs="butter",default="rhs"))
+
+inspect(head(milk.association.rules))
+
+```
+
+## Visualizations
+
+A straight-forward visualization of association rules is to use a scatter plot using plot() of the arulesViz package. It uses Support and Confidence on the axes. In addition, third measure Lift is used by default to color (grey levels) of the points.
+
+```{r}
+subRules<-association.rules[quality(association.rules)$confidence>0.4]
+#Plot SubRules
+plot(subRules)
+```
+
+Rules with high lift tend to have low support.
+
+```{r}
+plot(subRules,method="two-key plot")
+```
+
+The two-key plot uses support and confidence on x and y-axis respectively. It uses order for coloring. The order is the number of items in the rule.
+
+### Filtering rules with the highest lift
+
+Here is a parallel coordinates plot for 20 rules. For example, the arrow in red denotes that if a customer purchases red/blush wine they will also buy bottled beer.
+
+
+```{r}
+
+# Filter top 20 rules with highest lift
+subRules2<-head(subRules, n=20, by="lift")
+plot(subRules2, method="paracoord")
+```
+
+
+Given below are a few interactive visualizations to see more details between the rules and the items.
+
+
+```{r}
+plotly_arules(subRules)
+
+top10subRules <- head(subRules, n = 10, by = "confidence")
+
+plot(top10subRules, method = "graph",  engine = "htmlwidget")
+
+```
+
+
+
