@@ -1,0 +1,479 @@
+
+---
+title: "Market segmentation"
+---
+
+
+
+
+### Removing Spam, Adult, Chatter and Uncategorized as these columns are introducing noise into the Data
+
+
+```{r echo=FALSE, results='hide',message=FALSE}
+
+
+
+library(ggplot2)
+library(LICORS)  # for kmeans++
+library(foreach)
+library(mosaic)
+
+Market_seg = read.csv("/Users/maverick/Documents/MSBA SUMMER SEM/Predictive modelling 2/project/social_marketing.csv", row.names=1)
+
+
+```
+
+
+```{r , results='hide',message=FALSE}
+
+Market_seg = subset(Market_seg, select = -c(spam,adult ,chatter, uncategorized))
+head(Market_seg)
+
+```
+
+
+
+### Running K-means on the Data 
+
+
+```{r  results='hide',message=FALSE}
+
+set.seed(12)
+
+# Center and scale the data
+X = scale(Market_seg, center=TRUE, scale=TRUE)
+
+# Extract the centers and scales from the rescaled data (which are named attributes)
+mu = attr(X,"scaled:center")
+sigma = attr(X,"scaled:scale")
+
+# Run k-means with 6 clusters and 25 starts
+clust1 = kmeans(X, 6, nstart=25)
+
+
+```
+
+### Cluster 1 Importance
+
+```{r}
+#Sorted values of importance of each cluster
+
+sort(clust1$center[1,]*sigma + mu,decreasing=TRUE)
+length(which(clust1$cluster == 1))
+
+```
+### Cluster 2 Importance
+```{r}
+
+sort(clust1$center[2,]*sigma + mu, decreasing=TRUE)
+length(which(clust1$cluster == 2))
+```
+### Cluster 3 Importance
+
+
+```{r}
+
+
+sort(clust1$center[3,]*sigma + mu,decreasing=TRUE)
+length(which(clust1$cluster == 3))
+
+
+```
+
+### Cluster 4 Importance
+```{r}
+
+
+sort(clust1$center[4,]*sigma + mu,decreasing=TRUE)
+length(which(clust1$cluster == 4))
+```
+
+
+### Cluster 5 Importance
+```{r}
+
+sort(clust1$center[5,]*sigma + mu,decreasing=TRUE)
+length(which(clust1$cluster == 5))
+
+```
+
+### Cluster 6 Importance
+```{r}
+
+sort(clust1$center[6,]*sigma + mu,decreasing=TRUE)
+length(which(clust1$cluster == 6))
+
+```
+
+
+
+
+```{r}
+
+# qplot is in the ggplot2 library
+qplot(parenting,family , data=Market_seg, color=factor(clust1$cluster))
+```
+
+
+```{r}
+qplot(cooking, photo_sharing, data=Market_seg, color=factor(clust1$cluster))
+
+```
+
+
+### Running K-Means++
+
+```{r}
+
+
+X = scale(Market_seg, center=TRUE, scale=TRUE)
+
+# Extract the centers and scales from the rescaled data (which are named attributes)
+mu = attr(X,"scaled:center")
+sigma = attr(X,"scaled:scale")
+
+
+clust2 = kmeanspp(X, k=6, nstart=25)
+
+```
+
+### Cluster 1 Importance
+```{r}
+sort(clust2$center[1,]*sigma + mu,decreasing=TRUE)
+length(which(clust2$cluster == 1))
+
+```
+### Cluster 2 Importance
+```{r}
+sort(clust2$center[2,]*sigma + mu,decreasing=TRUE)
+length(which(clust2$cluster == 2))
+
+```
+### Cluster 3 Importance
+```{r}
+sort(clust2$center[3,]*sigma + mu,decreasing=TRUE)
+length(which(clust2$cluster == 3))
+
+```
+
+
+### Cluster 4 Importance
+
+```{r}
+sort(clust2$center[4,]*sigma + mu,decreasing=TRUE)
+length(which(clust2$cluster == 4))
+
+```
+### Cluster 5 Importance
+```{r}
+sort(clust2$center[5,]*sigma + mu,decreasing=TRUE)
+length(which(clust2$cluster == 5))
+```
+
+### Cluster 6 Importance
+```{r}
+sort(clust2$center[6,]*sigma + mu,decreasing=TRUE)
+length(which(clust2$cluster == 6))
+
+```
+
+```{r}
+
+
+# Compare versus within-cluster average distances from the first run
+clust1$withinss
+clust2$withinss
+
+
+sum(clust1$withinss)
+sum(clust2$withinss)
+
+clust1$tot.withinss
+clust2$tot.withinss
+
+clust1$betweenss
+clust2$betweenss
+
+
+
+```
+
+
+
+#PC Correlation 
+
+```{r echo=FALSE, results='hide',message=FALSE}
+# Load data on gene expression in cancer cells
+
+
+library(corrplot)
+library(RColorBrewer)
+library(scales)
+
+library(tidyverse)
+```
+
+```{r}
+M=cor(Market_seg)
+corrplot(M, method="color")
+
+#we can see the correlations are quite high and positive hence we can proceed with PCA
+
+```
+
+
+### We can see the correlation is high so we can run PC to get good results
+
+
+
+```{r}
+
+
+dim(Market_seg)  
+
+pr_Market_seg = prcomp(Market_seg, center = TRUE,scale=TRUE)
+
+summary(pr_Market_seg)
+plot(pr_Market_seg, type='l')
+
+
+
+
+```
+
+
+
+
+```{r}
+
+
+
+
+
+screeplot(pr_Market_seg, type = "l", npcs = 40, main = "Screeplot")
+abline(h = 1, col="red", lty=5)
+legend("topright", legend=c("Eigenvalue = 1"),
+       col=c("red"), lty=5, cex=0.6)
+
+#We see that it is eigen value=1 at 10
+
+cumpro <- cumsum(pr_Market_seg$sdev^2 / sum(pr_Market_seg$sdev^2))
+plot(cumpro[0:40], xlab = "PC #", ylab = "Amount of explained variance", main = "Cumulative variance plot")
+abline(v =10, col="blue", lty=5)
+abline(h = 0.65008, col="blue", lty=5)
+legend("topleft", legend=c("Cut-off @ PC10"),
+       col=c("blue"), lty=5, cex=0.6)
+
+
+#changed h= 0.65008 (Cumulative Proportion of PC10 and c=10)
+
+
+
+
+
+
+
+```
+
+
+```{r}
+
+scores = pr_Market_seg$x
+
+
+
+
+# first, what are PCs themselves?
+loadings = pr_Market_seg$rotation
+
+
+
+```
+
+Obtain value of Scores[1:10]
+
+```{r}
+scores = pr_Market_seg$x
+
+# First for principal components
+comp <- data.frame(scores[,1:10])
+
+```
+
+
+
+### Running PCA with Kmeans++
+
+
+```{r}
+
+
+
+
+
+X = scale(comp, center=TRUE, scale=TRUE)
+
+k <- kmeanspp(X, 6, nstart=25, iter.max=1000)
+
+palette(alpha(brewer.pal(9,'Set1'), 0.5))
+
+mu = attr(X,"scaled:center")
+sigma = attr(X,"scaled:scale")
+
+
+plot(X, col=k$clust, pch=16)
+
+```
+
+### Compare within-cluster average distances of K-means, K-means++ and PCA & K-means++
+
+
+```{r}
+
+
+clust1$withinss
+clust2$withinss
+k$withinss
+sum(clust1$withinss)
+sum(clust2$withinss)
+sum(k$withinss)
+clust1$tot.withinss
+clust2$tot.withinss
+k$tot.withinss
+clust1$betweenss
+clust2$betweenss
+k$betweenss
+
+
+
+
+
+
+```
+
+### We see that PC and k-means++ has the least Sum of Squares Value. 
+
+### Hence we can group clusters as the following :
+
+
+### Cluster 1 Importance
+```{r}
+
+
+
+
+sort(k$center[1,]*sigma + mu,decreasing=TRUE)
+
+
+loadings[,4] %>% sort %>% tail(5)
+loadings[,1] %>% sort %>% tail(5)
+
+
+length(which(k$cluster == 1))
+```
+
+### Cluster 2 Importance  
+
+```{r}
+
+sort(k$center[2,]*sigma + mu,decreasing=TRUE)
+
+loadings[,5] %>% sort %>% tail(5)
+loadings[,1] %>% sort %>% tail(5)
+loadings[,8] %>% sort %>% tail(5)
+loadings[,6] %>% sort %>% tail(5)
+
+
+length(which(k$cluster == 2))
+
+
+```
+
+### Cluster 3 Importance  
+
+
+```{r}
+
+
+sort(k$center[3,]*sigma + mu,decreasing=TRUE)
+loadings[,2] %>% sort %>% tail(5)
+loadings[,5] %>% sort %>% tail(5)
+
+
+length(which(k$cluster == 3))
+
+```
+
+### Cluster 4 Importance  
+
+```{r}
+sort(k$center[4,]*sigma + mu,decreasing=TRUE)
+loadings[,3] %>% sort %>% tail(5)
+loadings[,1] %>% sort %>% tail(5)
+loadings[,4] %>% sort %>% tail(5)
+loadings[,5] %>% sort %>% tail(5)
+
+length(which(k$cluster == 4))
+
+```
+
+### Cluster 5 Importance  
+
+
+```{r}
+
+sort(k$center[5,]*sigma + mu,decreasing=TRUE)
+loadings[,7] %>% sort %>% tail(5)
+loadings[,8] %>% sort %>% tail(5)
+loadings[,3] %>% sort %>% tail(5)
+
+
+length(which(k$cluster == 5))
+```
+
+### Cluster 6 Importance  
+
+
+```{r}
+sort(k$center[6,]*sigma + mu,decreasing=TRUE)
+loadings[,6] %>% sort %>% tail(5)
+loadings[,1] %>% sort %>% tail(5)
+loadings[,3] %>% sort %>% tail(5)
+
+
+
+
+length(which(k$cluster == 6))
+```
+
+
+
+
+
+
+### Conclusion 
+
+
+After running K means on PC, we see that there is high correlation between the six clusters.  
+
+In the first cluster, we see that News and Politics pops up as well as personal fitness and health nutrition. Some other features include parenting and school. Since it has sports_fandom and outdoors, I would assume this cluster is more inclined to elder male adults who have families and children. 
+
+
+In the second cluster, we see a high importance for beauty, fashion,cooking ,shopping,photo-sharing and art. We can assume that this cluster caters to young women and mothers. 
+
+In the third cluster, we see a high importance for sports_fandom,religion, parenting and food and school. We can assume this particularly caters to adult males in the age bracket of 30-40.
+
+In the fourth cluster, travel, computers ,politics , automotive has high importance.
+
+
+In cluster five, we see a high importance for automotive, current events, tv_film. this would appear to be youth. 
+
+In cluster six, we see a high impportance for online_gaming, sports_playing, college_uni, cooking and automotive. This would appear to be young men
+
+
+
+
+
+
+
+
