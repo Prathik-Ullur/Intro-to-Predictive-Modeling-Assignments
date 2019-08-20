@@ -884,28 +884,50 @@ length(which(k$cluster == 6))
 ### Conclusion
 
 After running K means on PC, we see that there is high correlation
-between the six clusters.
+between the six clusters. Here is what we gathered from the results of
+running a K-means ++ algorithm on the subset of data obtained from PC
+Analysis.
 
-In the first cluster, we see that News and Politics pops up as well as
-personal fitness and health nutrition. Some other features include
-parenting and school. Since it has sports\_fandom and outdoors, I would
-assume this cluster is more inclined to elder male adults who have
-families and children.
+**Middle aged Parents:** In the first cluster, we see that News and
+Politics pops up as well as personal fitness and health nutrition. Some
+other features include parenting, sports\_fandom and school. This led us
+to believe that this cluster could consist mostly of adults who are
+probably parents and those who follow the news and politics
+consistently. They tend to focus on nutritional welfare of their kids
+and are constantly on the look out for new recipes to experiement for
+their kids. People in this assumed age bracket also tend to be middle
+aged and hence more conscious about their health & fitness.
 
-In the second cluster, we see a high importance for beauty,
-fashion,cooking ,shopping,photo-sharing and art. We can assume that this
-cluster caters to young women and mothers.
+**Stay at home Mums:** In the second cluster, we see a high importance
+for beauty, fashion,cooking ,shopping,photo-sharing and art. We can
+assume that this cluster caters to young women and mothers. People in
+this cluster also follow the news, watch films on tv and are interested
+in art. Online gaming is an interesting topic to have surfaced in this
+cluster as well.
 
-In the third cluster, we see a high importance for
-sports\_fandom,religion, parenting and food and school. We can assume
-this particularly caters to adult males in the age bracket of 30-40.
+**Working mothers:** In the third cluster, we see a high importance for
+religion, parenting and food and school. The same can also be observed
+for shopping, cooking, fashion and beauty. Thus, we believe that the
+third cluster is an equally representative mix of the above two
+clusters. This would fit the role of a working mom whose attention is
+split usually between her own needs and that of her family.
 
-In the fourth cluster, travel, computers ,politics , automotive has high
-importance.
+**Media person:** In the fourth cluster, travel, computers ,politics ,
+automotive have high importance. Fashion, beauty, cooking and
+photo-sharing also make the list. Thus, this cluster could represent a
+person who is mostly in the limelight and would like to stay abreast on
+global trends. They probably travel a lot for their work and hence are
+on the constant look out for new places and food to explore.
 
-In cluster five, we see a high importance for automotive, current
-events, tv\_film. this would appear to be youth.
+**Gen Z young-gun:** In cluster five, we see a high importance for
+automotive, current events, tv\_film. We also see significant weights
+for fashion, beauty and photo-sharing. This would appear to be the
+subset of people who are young and are constantly on social media. They
+need to know what’s happening in the world around and make their
+presence felt on the internet.
 
-In cluster six, we see a high impportance for online\_gaming,
-sports\_playing, college\_uni, cooking and automotive. This would appear
-to be young men
+**College students:** In cluster six, we see a high impportance for
+online\_gaming, sports\_playing, college\_uni, school, sports\_fandom,
+cooking and automotive. These are mostly viable topics of interest for
+students in College. Hence, we believe that this cluster would be an
+ideal match for College students.
