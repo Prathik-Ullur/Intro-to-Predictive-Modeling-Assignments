@@ -1,0 +1,1614 @@
+---
+title: "STA 380, Part 2: Exercises - Namita Ramesh, Nithin Saseendran, Prathik Ullur"
+output: github_document
+always_allow_html: yes
+---
+
+# Visual story telling part 1: Green Buildings  
+
+```{r echo=FALSE, results='hide',message=FALSE}
+rm(list=ls())
+
+library(mosaic)
+library(tidyverse)
+
+
+
+Building_Data = read.csv(file="greenbuildings.csv", header=TRUE, sep=",")
+
+
+```
+
+### Let us take a look at the Data by running str(Building_Data). 
+
+We also ran is.na(Building_Data) to take a look at any null values. We see that empl_gr has 71 null values.  
+
+
+```{r echo=FALSE,message=FALSE}
+
+str(Building_Data)
+summary(is.na(Building_Data))
+
+
+```
+
+
+
+### We see that the leasing rate is 0 for a few buildings and hence we shall not be considering them in our dataset.
+
+We shall now remove all buildings with Leasing Rate less than 15%.  
+
+
+```{r echo=FALSE, message=FALSE}
+ggplot(data=Building_Data, aes(Building_Data$leasing_rate)) + 
+  geom_histogram() +
+geom_vline(data=Building_Data, aes(xintercept = median(Building_Data$leasing_rate)), colour="red") 
+
+
+Building_Data_removed_15=Building_Data[which(!Building_Data$leasing_rate < 15), ] 
+
+
+ggplot(data=Building_Data_removed_15, aes(Building_Data_removed_15$leasing_rate)) + 
+  geom_histogram() +
+geom_vline(data=Building_Data_removed_15, aes(xintercept = median(Building_Data_removed_15$leasing_rate)), colour="red") 
+
+```
+
+
+
+
+```{r }
+
+
+
+median(Building_Data$leasing_rate)
+
+median(Building_Data_removed_15$leasing_rate)
+
+```
+```{r echo=FALSE, message=FALSE}
+Building_Data=Building_Data[which(!Building_Data$leasing_rate < 15), ] 
+```
+
+
+### Now let us consider green and non-green buildings seperately 
+
+
+
+```{r echo=FALSE, message=FALSE}
+
+green_buildings=Building_Data[which(Building_Data$green_rating == 1), ] 
+
+ggplot(data=green_buildings, aes(green_buildings$size)) + 
+  geom_histogram() +
+geom_vline(data=green_buildings, aes(xintercept = median(green_buildings$size)), colour="red") 
+
+
+
+non_green_buildings=Building_Data[which(!Building_Data$green_rating == 1), ] 
+
+ggplot(data=non_green_buildings, aes(non_green_buildings$size)) + 
+  geom_histogram() +
+geom_vline(data=non_green_buildings, aes(xintercept = median(non_green_buildings$size)), colour="red") 
+
+
+
+print(c('The median size for green buildings is : ',median(green_buildings$size)))
+
+print(c("The median size for non-green buildings is : ", median(non_green_buildings$size)))
+
+```
+
+
+
+
+
+```{r echo=FALSE, message=FALSE}
+ggplot(data=green_buildings, aes(green_buildings$stories)) + 
+  geom_histogram() +
+geom_vline(data=green_buildings, aes(xintercept = median(green_buildings$stories)), colour="red")
+
+
+ggplot(data=non_green_buildings, aes(non_green_buildings$stories)) + 
+  geom_histogram() +
+geom_vline(data=non_green_buildings, aes(xintercept = median(non_green_buildings$stories)), colour="red")
+
+
+
+print("The median stories for green buildings is : ")
+
+median(green_buildings$stories)
+
+
+print("The median stories for non-green buildings is : ")
+
+median(non_green_buildings$stories)
+
+
+
+```
+
+
+
+
+
+
+```{r echo=FALSE, message=FALSE}
+
+
+
+ggplot(data=green_buildings, aes(green_buildings$Rent)) + 
+  geom_histogram() +
+geom_vline(data=green_buildings, aes(xintercept = median(green_buildings$Rent)), colour="red") 
+
+ggplot(data=non_green_buildings, aes(non_green_buildings$Rent)) + 
+  geom_histogram() +
+geom_vline(data=non_green_buildings, aes(xintercept = median(non_green_buildings$Rent)), colour="red") 
+
+
+
+print("The median rent for green buildings is : ")
+
+median(green_buildings$Rent)
+
+
+print("The median rent for non-green buildings is : ")
+
+median(non_green_buildings$Rent)
+
+```
+
+
+```{r echo=FALSE, message=FALSE}
+
+
+
+ggplot(data = green_buildings) + 
+  geom_point(mapping = aes(x = size, y = Rent), colour = 'green',alpha = 6/10) +
+  geom_vline(data=green_buildings, aes(xintercept = median(green_buildings$size)), colour="red")
+
+
+ggplot(data = non_green_buildings) + 
+  geom_point(mapping = aes(x = size, y = Rent), colour = 'light blue') +
+  geom_vline(data=non_green_buildings, aes(xintercept = median(non_green_buildings$size)), colour="red")
+
+
+ggplot(data = green_buildings) + 
+  geom_point(mapping = aes(x = stories, y = Rent), colour = 'green',alpha = 6/10) +
+geom_vline(data=green_buildings, aes(xintercept = median(green_buildings$stories)), colour="red") 
+
+
+ggplot(data = non_green_buildings) + 
+  geom_point(mapping = aes(x = stories, y = Rent), colour = 'light blue') +
+geom_vline(data=non_green_buildings, aes(xintercept = median(non_green_buildings$stories)), colour="red") 
+
+
+
+```
+
+
+
+
+
+
+```{r echo=FALSE, message=FALSE}
+
+size_sum = Building_Data %>%
+  group_by(cluster)  %>%  # group the data points by model name
+  summarize(size2 = median(size))  
+
+
+
+ggplot(size_sum, aes(x=reorder(cluster, size2), y=size2)) + 
+  geom_bar(stat='identity') + 
+  coord_flip()+labs(x = "Cluster",y='Median Size')
+
+size_sum = Building_Data %>%
+  group_by(cluster)  %>%  # group the data points by model name
+  summarize(size2 = median(stories))  
+
+
+
+ggplot(size_sum, aes(x=reorder(cluster, size2), y=size2)) + 
+  geom_bar(stat='identity') + 
+  coord_flip()+labs(x = "Cluster",y='Median Stories')
+
+
+
+```
+
+
+From our initial analysis, we believe that it wouldnt be an accurate representation of the data to pick the median value of the entire dataset. This is because the question in context only refers to a building of size 250,000 sq.feet and 15 stories and hence it makes more sense to consider only clusters with median size and stories around those values while calculating the Rent 
+
+
+With this in mind, let us shrink the data to obtain buildings in clusters with median height to be around 250,000 and stories 15. From the problem statement, we know that the building is a new 15-story mixed-use building on East Cesar Chavez, just across I-35 from downtown. given that downtown is known to have more high rise buildings than the other parts of Austin, we beileive we should include only the subset of clusters with this median size and storey height.
+
+### Finding average median among green buildings of stories and size  
+
+```{r echo=FALSE, message=FALSE}
+
+
+average_median_stories=(aggregate(green_buildings$stories~green_buildings$cluster, data=green_buildings, median))
+
+
+average_median=(aggregate(green_buildings$size~green_buildings$cluster, data=green_buildings, median))
+
+
+```
+
+
+```{r}
+
+
+BD3=green_buildings[(average_median[2]>150000) & (average_median[2]<350000) & (average_median_stories[2]>11) & (average_median_stories[2]<30), ] 
+
+
+
+```
+
+
+```{r echo=FALSE, message=FALSE}
+
+
+ggplot(data=BD3, aes(BD3$size)) + 
+  geom_histogram() +
+geom_vline(data=BD3, aes(xintercept = median(BD3$size)), colour="red") +
+labs(x = "Cluster",y='Median Size of Green buildings')
+
+
+ggplot(data=BD3, aes(BD3$stories)) + 
+  geom_histogram() +
+geom_vline(data=BD3, aes(xintercept = median(BD3$stories)), colour="red") +
+labs(x = "Cluster",y='Median Stories of Green buildings')
+
+
+
+#We see that the size is not equal among the data and the median is in 128838sq feet, Hence we cannot take this data to perform our analysis. We need to take 
+
+
+```
+```{r echo=FALSE, message=FALSE}
+
+ggplot(data = BD3) + 
+  geom_point(mapping = aes(x = size, y = Rent, color = green_rating),colour='green') +
+  geom_vline(data=BD3, aes(xintercept = median(BD3$size)), colour="red") 
+
+ggplot(data = BD3) + 
+  geom_point(mapping = aes(x = stories, y = Rent, color = green_rating),colour='green') +
+  geom_vline(data=BD3, aes(xintercept = median(BD3$stories)), colour="red") 
+
+
+```
+
+
+```{r}
+
+ggplot(data=BD3, aes(BD3$Rent)) + 
+  geom_histogram() +
+geom_vline(data=BD3, aes(xintercept = median(BD3$Rent)), colour="red") 
+
+median(BD3$Rent)
+
+
+```
+
+
+#### From this we see that the rent is 31.45  
+
+
+### Now let us calculate for non-green buildings in the same cluster.
+
+
+
+
+```{r , message=FALSE}
+
+
+
+BD2_non_green=Building_Data[which(!Building_Data$green_rating == 1), ] 
+
+
+BD3_non_green=BD2_non_green[(average_median[2]>150000) & (average_median[2]<350000) & (average_median_stories[2]>11) & (average_median_stories[2]<30), ] 
+
+```
+
+We are now calculating the median Rent price for Non-green buildings in the clusters present with average size 250,000 and storey height 15.
+
+
+```{r echo=FALSE, message=FALSE}
+
+ggplot(data=BD3_non_green, aes(BD3_non_green$Rent)) + 
+  geom_histogram() +
+geom_vline(data=BD3_non_green, aes(xintercept = median(BD3_non_green$Rent)), colour="red") 
+
+median(BD3_non_green$Rent)
+
+```
+
+
+### Conclusion :
+
+ Median Rent for green buildings in clusters with median size = 250000 and median stories 15: 31.45 
+
+ Median Rent for non-green buildings in clusters with median size = 250000 and median stories 15: 25.48
+
+ Hence difference is : 31.45-25.48 = 5.97;  5.97*250,000=1,492,500  
+
+ Amount taken to construct 5,000,000;  Hence it is : 5,000,000/1,492,500  
+ **3.35 years to gain the money back**
+
+
+But let us see the median leasing rate : #92.285  
+
+
+```{r echo=FALSE, message=FALSE}
+
+
+ggplot(data=BD3, aes(BD3$leasing_rate)) + 
+  geom_histogram() +
+geom_vline(data=BD3, aes(xintercept = median(BD3$leasing_rate)), colour="red") 
+
+
+```
+
+
+3.35/92.285 = 3.63 years
+
+Even with a leasing rate of 92%, it shall take 3.63 years to earn back the money and the building will have an extra profit of $1,492,500 per year
+
+
+# Flights at ABIA
+
+Dataset contains all incoming and outgoing Flights flying in and out of the Austin-Bergstrom Interational Airport. 
+
+## Reading in the data
+```{r echo = FALSE, include = FALSE}
+library(ggplot2)
+library(ggthemes)
+library(directlabels)
+library(sqldf)
+library(tidyverse)
+library(ggmap)
+library(dplyr)
+library(maps)
+library(geosphere)
+library(RColorBrewer)
+
+# Read ABIA data and airport codes
+abia <- read.csv("ABIA.csv",header=TRUE, sep=",")
+
+#Splitting into 2 separate dataframes based on destination/source
+attach(abia)
+colnames(abia)[colnames(abia)=="ï..Year"] <- "Year"
+dfFromAUS <- abia[which(abia$Origin == "AUS"),]
+dfToAUS <- abia[which(abia$Dest == "AUS"),]
+
+```
+Here's a peak into the dataset:
+1. 99260 rows of data mapped to 29 columns  
+2. Missing values - It can be observed from the table given below that the number of missing values for certain columns such as CarrierDelay,WeatherDelay,NASDelay,SecurityDelay,LateAircraftDelay are way too high (i.e 79513). Hence it may not be very helpful to use these in our analysis.  
+
+```{r echo = FALSE, warning = FALSE}
+dim(abia)
+missing_values <- as.data.frame(sapply(abia, FUN = function(x){sum(is.na(x))}))
+missing_values$Columns <- rownames(missing_values)
+rownames(missing_values) <- NULL
+names(missing_values) <- c("Missing_Count", "Column Name")
+missing_values <- missing_values[c(2,1)]
+missing_values
+```
+# Overview of Insights
+Here's a list of interesting insights we'd like to gather from the dataset:  
+1. What are the top 5 destinations that people tend to fly to from Austin?   
+2. What times of the year get most traffic to the top 5 destinations from Austin?  
+3. Arrival and Departure Delays by Carrier  
+4. Delays by time of the day vs Month  
+5. Visualization of incoming and outgoing Air traffic from ABIA  
+
+
+### Top 5 Destinations from Austin  
+The top 5 destinations people fly out to from Austin are Dallas, Dallas(again!), Houston, Phoenix and Denver. There are over 11000 flights from Austin to Dallas in 2008, which is almost a staggering 900 outgoing flights to Dallas from Austin!  
+Dallas-Forth Worth International Airport (DFW) serves as headquarters to the world’s largest carrier, American Airlines, while Dallas Love (DAL) is home to the world’s biggest low-cost carrier, Southwest. Dallas could arguably be considered the most important city in the U.S. aviation industry.   
+```{r echo = FALSE, warning = FALSE}
+top_DEST_from_AUS <- sqldf("select Dest, count(*) as 'Num_of_Flights' from dfFromAUS where Cancelled == 0 group by Dest order by Num_of_Flights DESC ")
+top_DEST_from_AUS %>% head(5) %>%
+   ggplot(aes(x = reorder(Dest,Num_of_Flights), y = Num_of_Flights, fill = Num_of_Flights)) + 
+  geom_bar(stat ='identity') + 
+  coord_flip() + 
+  scale_x_discrete("Destination Airports") +
+  scale_y_continuous("Number of Flights in 2008") +
+  ggtitle("Top 5 Destinations from Austin") +
+  theme_minimal()
+
+top_5_dest <- head(top_DEST_from_AUS,5)
+top_5_dest <- as.character(top_5_dest$Dest)
+top_5_dest
+
+```
+### Monthwise trends in departures to Top 5 Destinations  
+Digging deeper to see if there are any interesting trends in frequency of flights to these top 5 destinations, we found that there was a noticeable change in the number of departures to the aiports in Dallas - DFW and DAL. This was peculiar because we would expect the distribution to be remotely similar to both these airports with the end destinations being the same!  
+What is important to note here is the period in context. 2008 was a tough year for global economies. The impact on businesses was also evident. We figured that 2008, especially the latter part of the year, must have been a tough year for Southwest Airlines (DAL is home to this low-cost budget airlines company). Our intuition turned out to be true as can be seen in this interview with the CEO from 2008 - https://www.sfgate.com/business/article/Southwest-CEO-describes-2008-s-challenges-3292577.php   
+
+```{r echo = FALSE, warning = FALSE}
+month_data <- abia %>% filter(Origin == "AUS", Dest %in% top_5_dest, Cancelled == 0) %>% group_by(Dest, Month) %>% summarise("Num_of_Flights" = n()) %>% arrange(-Num_of_Flights)%>%ggplot(aes(x = as.factor(Month), y = Num_of_Flights, group = Dest,color=Dest)) + 
+  geom_line(aes(linetype = Dest)) +
+  theme_minimal() +
+  geom_dl(aes(label = Dest), method = list("last.points", hjust = 0.5, vjust = -0.5)) +
+  scale_y_continuous("Number of flights")+
+  scale_x_discrete("Month") +
+  ggtitle("Departures per month in 2008 to top 5 destinations")
+
+month_data
+
+```
+
+### Delay Analysis  
+"Research in consumer psychology shows that customers seek reasons for service failures and that attributions of blame moderate the effects of failure on the level of customer satisfaction" - Quoted in a journal titled "The Impact of Service Operations Failures on
+Customer Satisfaction: Evidence on How Failures and
+Their Source Affect What Matters to Customers" (https://pdfs.semanticscholar.org/1487/dc65b163be21554246aac9b9884c7916d671.pdf)
+
+
+Delays in arrival or departure thus contribute significantly to customer experience while flying in a particular airline. Thus, we decided to look into average delays in departure and arrival.  
+```{r echo = FALSE, warning = FALSE}
+#Plotting Dep delays by Carriers
+library(dplyr)
+library(ggplot2)
+library(sqldf)
+df1 <- select(dfFromAUS, UniqueCarrier, DepDelay)
+res = summarise_at(group_by(df1,UniqueCarrier),vars(DepDelay),funs(mean(.,na.rm=TRUE)))
+ylim <- c(0, 1.1*max(res$DepDelay))
+x1 <- barplot(res$DepDelay ~ res$UniqueCarrier, data = res, width = 1, main = "Dep Delays", xlab="Carriers", ylab = "DepDelay (in minutes)", las = 2, ylim=ylim) 
+text(x = x1, y = round(res$DepDelay), label = round(res$DepDelay), pos = 3, cex = 0.8, col = "red")
+
+#Delay Density
+delayDensity <- sqldf("select UniqueCarrier, sum(DepDelay)/count(*) as 'Delay_Density' from abia where DepDelay > 0 group by UniqueCarrier ;")
+
+ylim <- c(0, 1.1*max(delayDensity$Delay_Density))
+DepDensity <- barplot(delayDensity$Delay_Density ~ delayDensity$UniqueCarrier, data = res, width = 1, main = "Density of Dep Delays", xlab="Carriers", ylab = "DepDelay (in minutes)/No. of flights", las = 2, ylim=ylim) 
+
+```
+
+
+```{r echo = FALSE, warning = FALSE}
+#Plotting Arrival delays by Carriers
+
+df2 <- select(dfToAUS, UniqueCarrier, ArrDelay)
+out = summarise_at(group_by(df2,UniqueCarrier),vars(ArrDelay),funs(mean(.,na.rm=TRUE)))
+ylim <- c(0, 1.1*max(out$ArrDelay))
+x2 <- barplot(out$ArrDelay ~ out$UniqueCarrier, data = out, width = 1, main = "Arr Delays", xlab="Carriers", ylab = "Arrival Delay (in minutes)", las = 2, ylim=ylim) 
+text(x = x2, y = round(out$ArrDelay), label = round(out$ArrDelay), pos = 3, cex = 0.8, col = "red")
+
+#Arrival Delay Density
+ArrdelayDensity <- sqldf("select UniqueCarrier, sum(ArrDelay)/count(*) as 'Arr_Delay_Density' from abia where ArrDelay > 0 group by UniqueCarrier ;")
+
+ylim <- c(0, 1.1*max(ArrdelayDensity$Arr_Delay_Density))
+ArrDensity <- barplot(ArrdelayDensity$Arr_Delay_Density ~ ArrdelayDensity$UniqueCarrier, data = res, width = 1, main = "Density of Arrival Delays", xlab="Carriers", ylab = "Arrival Delay (in minutes)/No. of flights", las = 2, ylim=ylim) 
+```
+
+First we plotted the Delay in minutes for both Departure and Arrival with respect to the Carrier. However, the data was not conclusive. This was because the number of flights per airlines in this given dataset varies considerably. Hence to get a more accurate representation of the airline carriers who tend to have the most delays, we calculated the delay densities of each airline by computing the total delay by the number of flights departed/arrived for each carrier.  
+
+### Delay by time of the day  
+
+To find out the times of the day when delays are most likely, we bucketed the Scheduled Departure time into 7 buckets as follows:  
+1. Early Morning (12am - 6am)  
+2. Morning (6am - 9am)  
+3. Pre-Afternoon (9am - 12pm)  
+4. Affternoon (12pm - 3pm)  
+5. Evening (3pm - 6pm)  
+6. Night (6pm- 9pm)  
+7. Late Night (9pm - 12am)  
+
+We are now plotting the most likely zones of delay in a day by month.  
+```{r echo = FALSE, warning = FALSE}
+abia$CRSDepTimeCategory <- NA
+abia$CRSDepTimeCategory[abia$CRSDepTime <= 600] <- "Early Morning"
+abia$CRSDepTimeCategory[abia$CRSDepTime > 600 & abia$CRSDepTime <= 900] <- "Morning"
+abia$CRSDepTimeCategory[abia$CRSDepTime > 900 & abia$CRSDepTime <= 1200] <- "Pre-Afternoon"
+abia$CRSDepTimeCategory[abia$CRSDepTime > 1200 & abia$CRSDepTime <= 1500] <- "Afternoon"
+abia$CRSDepTimeCategory[abia$CRSDepTime > 1500 & abia$CRSDepTime <= 1800] <- "Evening"
+abia$CRSDepTimeCategory[abia$CRSDepTime > 1800 & abia$CRSDepTime <= 2100] <- "Night"
+abia$CRSDepTimeCategory[abia$CRSDepTime > 2100 & abia$CRSDepTime <= 2359] <- "Late Night"
+abia$CRSDepTimeCategory <- factor(abia$CRSDepTimeCategory,
+                                        levels = c("Early Morning", "Morning", "Pre-Afternoon",
+                                                   "Afternoon", "Evening", "Night", "Late Night"),
+                                     ordered = TRUE)
+
+flights_delayed <- as.data.frame(abia %>%
+                                   filter(Cancelled==0, DepDelay > 30, Origin == "AUS") %>%
+                                   group_by(Month, CRSDepTimeCategory) %>%
+                                   summarise("Flights_Delayed" = n()))
+total_flights <- as.data.frame(abia %>%
+                                   filter(Cancelled==0, Origin == "AUS") %>%
+                                   group_by(Month, CRSDepTimeCategory) %>%
+                                   summarise("Total_Flights" = n()))
+merge_df <- left_join(total_flights, flights_delayed)
+merge_df$Prop_Delayed <- merge_df$Flights_Delayed*100/merge_df$Total_Flights
+
+myColors <- brewer.pal(3, "Blues")
+
+ggplot(data = merge_df, 
+       aes(x = as.factor(Month), y = CRSDepTimeCategory, fill = Prop_Delayed)) + 
+  geom_tile() +
+  scale_fill_gradientn('Scale of Flights Delayed', colors = myColors) +
+  theme_minimal() + 
+  ggtitle("Delay times by Month") +
+  scale_y_discrete("Departure Times") +
+  scale_x_discrete("Month")
+```
+It can be seen from the graph above that the upper half of the graph depecting the latter parts of a day have more darker shaded squares implying that _**more delays happen in the second half of the day**_.
+_Highest delays can be observed in the month of December_ given the obvious weather conditions, especially at Night.  
+
+
+### Visualization depicting Flights out of Austin
+```{r echo = FALSE, warning = FALSE}
+
+
+library(tidyverse)
+library(ggmap)
+library(dplyr)
+library(maps)
+library(geosphere)
+
+## Read flight and airports lists 
+abia <- read.csv("ABIA.csv",header=TRUE, sep=",")
+airports_file <- "airports.csv"
+if (file.exists(airports_file)) {
+  airports <- read.csv(airports_file)
+  } else {
+  airports <- data_frame(airport = NA, lon = NA, lat= NA)
+}
+
+attach(abia)
+# Rename a column in R
+colnames(airports)[colnames(airports)=="ï..Airport"] <- "Airport"
+attach(abia)
+colnames(abia)[colnames(abia)=="ï..Year"] <- "Year"
+dfFromAUS <- abia[which(abia$Origin == "AUS"),]
+
+```
+
+```{r echo = FALSE, warning = FALSE}
+flights_from_aus <- merge(dfFromAUS, airports, by.x = "Dest", by.y = "Airport")
+flights_from_aus <- merge(flights_from_aus, airports, by.x = "Origin", by.y = "Airport")
+flights_from_aus <- flights_from_aus %>% 
+  select(Origin, Dest, lon.x, lat.x, lon.y, lat.y) %>% 
+  as_data_frame()
+
+#create basemap
+map("world", regions=c("usa"), fill=T, col="grey8", bg="grey15", ylim=c(21.0,50.0), xlim=c(-130.0,-65.0))
+#overlay airports
+points(airports$lon,airports$lat, pch=4, cex=0.4, col="chocolate1")
+
+#Plot route lines
+for (i in (1:dim(flights_from_aus)[1])) { 
+inter <- gcIntermediate(c(flights_from_aus$lon.x[1], flights_from_aus$lat.x[1]), c(flights_from_aus$lon.x[i], flights_from_aus$lat.x[i]), n=200)
+lines(inter, lwd=0.1, col="turquoise2")    
+}
+
+```
+
+# Portfolio Modeling  
+
+### Loading all required libraries  
+
+```{r warning=FALSE}
+library(mosaic)
+library(quantmod)
+library(foreach)
+```
+
+### 1. Importing top 3 oil & gas ETF's - last 5 yrs data - Portfolio 1  
+### 2. Importing top 3 Building&Construction & top 2 Commodities ETF's - last 5 yrs data - Portfolio 2  
+### 3. Import top 7 Diversified Portfolio ETF's - last 5 yrs data - Portfolio 3  
+
+### Creating an all return matrix for all the 3 portfolios  
+
+```{r warning=FALSE, error=FALSE}
+
+# Import top 3 oil & gas ETF's - last 5 yrs data
+etf1 = c("USO", "UNG", "DBO")
+
+# Import top 3 Building&Construction & top 2 Commodities ETF's - last 5 yrs data
+etf2 = c("ITB", "XHB", "PKB","PDBC","DBC")
+
+# Import top 7 Diversified Portfolio ETF's - last 5 yrs data
+etf3 = c("AOR", "AOM", "AOA", "MDIV", "AOK", "IYLD", "GAL")
+
+#Getting data for past 5 years
+getSymbols(etf1, from = "2014-08-01")
+getSymbols(etf2, from = "2014-08-01")
+getSymbols(etf3, from = "2014-08-01")
+
+
+for(ticker in etf1) {
+	expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+	eval(parse(text=expr))
+}
+
+all_returns1 = cbind(	ClCl(USOa),
+								ClCl(UNGa),
+								ClCl(DBOa))
+
+# Creating all return matrix for Portfolio 1
+all_returns1 = as.matrix(na.omit(all_returns1))
+summary(all_returns1)
+
+for(ticker in etf2) {
+	expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+	eval(parse(text=expr))
+}
+
+all_returns2 = cbind(	ClCl(ITBa),
+								ClCl(XHBa),
+								ClCl(PKBa),
+								ClCl(PDBCa),
+								ClCl(DBCa))
+
+# Creating all return matrix for Portfolio 2
+all_returns2 = as.matrix(na.omit(all_returns2))
+summary(all_returns2)
+
+for(ticker in etf3) {
+	expr = paste0(ticker, "a = adjustOHLC(", ticker, ")")
+	eval(parse(text=expr))
+}
+
+all_returns3 = cbind(	ClCl(AORa),
+								ClCl(AOMa),
+								ClCl(AOAa),
+								ClCl(MDIVa),
+								ClCl(AOKa),
+								ClCl(IYLDa),
+								ClCl(GALa))
+# Creating all return matrix for Portfolio 3
+all_returns3 = as.matrix(na.omit(all_returns3))
+summary(all_returns3)
+```
+
+### Calculating VAR for Portfolio 1  
+#### From the summary of returns, it seems ETF "UNG" has a neagtive mean and median return. Hence assigning weights as (0.4,0.2,0.4) to have lesser weights on "UNG"  
+
+```{r}
+
+# Monte Carlo Simulation to Calculate VAR for Portfolio 1
+initial_wealth = 100000
+# 5000 simulations
+sim1 = foreach(i=1:5000, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.4, 0.2, 0.4)
+	holdings = weights * total_wealth
+	n_days = 20
+	wealthtracker1 = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns1, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker1[today] = total_wealth
+		holdings = weights * total_wealth #re-balancing each day
+		
+	}
+	((wealthtracker1[20]-initial_wealth)*100)/initial_wealth
+	
+}
+sorted_sim_1=sort(sim1)
+VAR1=sorted_sim_1[250]
+VAR1
+
+```
+
+### Calculating VAR for Portfolio 2  
+#### From the summary of returns, it seems ETF "PDBC" and "DBC" hvae neagtive mean returns. Hence assigning the weights accordingly as (0.2,0.3,0.3,0.1,0.1) to have lesser weights on "PDBC" and "DBC"  
+
+```{r}
+
+# Monte Carlo Simulation to Calculate VAR for Portfolio 2
+initial_wealth = 100000
+#5000 Simulations
+sim2 = foreach(i=1:5000, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.2, 0.3, 0.3, 0.1, 0.1)
+	holdings = weights * total_wealth
+	n_days = 20 #20 trading day
+	wealthtracker2 = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns2, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker2[today] = total_wealth
+		holdings = weights * total_wealth #re-balancing each day
+		
+	}
+	((wealthtracker2[20]-initial_wealth)*100)/initial_wealth
+	
+}
+sorted_sim_2=sort(sim2)
+VAR2=sorted_sim_2[250]
+VAR2
+
+```
+
+### Calculating VAR for Portfolio 3  
+#### From the summary of returns, all ETF's have comparable returns. Hence assigning almost equal weights to them.  
+
+```{r}
+
+# Monte Carlo Simulation to Calculate VAR for Portfolio 3
+initial_wealth = 100000
+#5000 simulations
+sim3 = foreach(i=1:5000, .combine='rbind') %do% {
+	total_wealth = initial_wealth
+	weights = c(0.15, 0.15, 0.15, 0.15,0.15,0.15,0.1)
+	holdings = weights * total_wealth
+	n_days = 20
+	wealthtracker3 = rep(0, n_days)
+	for(today in 1:n_days) {
+		return.today = resample(all_returns3, 1, orig.ids=FALSE)
+		holdings = holdings + holdings*return.today
+		total_wealth = sum(holdings)
+		wealthtracker3[today] = total_wealth
+		holdings = weights * total_wealth #re-balancing each day
+		
+	}
+	((wealthtracker3[20]-initial_wealth)*100)/initial_wealth
+	
+}
+sorted_sim_3=sort(sim3)
+VAR3=sorted_sim_3[250]
+VAR3
+
+```
+
+```{r}
+print("Final Report")
+cat("\nPortfolio 1 containing top 3 oil & gas ETF's - ",etf1, "\n4-week (20 trading day) VAR at the 5% level = ", VAR1,"%")
+cat("\n\nPortfolio 2 containing top 3 Building&Construction & top 2 Commodities ETF's - ",etf2, "\n4-week (20 trading day) VAR at the 5% level = ", VAR2,"%")
+cat("\n\nPortfolio 3 containing top 7 Diversified Portfolio ETF's - ",etf3, "\n4-week (20 trading day) VAR at the 5% level = ", VAR3,"%")
+```
+
+### **Final Report**
+
+
+Portfolio  | ETF List                                          | ETF Category                                     | 4-week VAR
+---------  | ---------------                                   | ------------------                               | -------------
+ 1         | "USO", "UNG", "DBO"                               | Top 3 oil & gas                                  | -14.64 %
+ 2         | "ITB", "XHB", "PKB","PDBC","DBC"                  | Top 3 Building&Construction & top 2 Commodities  |  -6.68 %
+ 3         | "AOR", "AOM", "AOA", "MDIV", "AOK", "IYLD", "GAL" | Top 7 Diversified Portfolios                     |  -2.79 %
+
+
+
+# Market segmentation  
+
+
+### Removing Spam, Adult, Chatter and Uncategorized as these columns are introducing noise into the Data
+
+
+```{r echo=FALSE, results='hide',message=FALSE}
+
+
+
+library(ggplot2)
+library(LICORS)  # for kmeans++
+library(foreach)
+library(mosaic)
+
+Market_seg = read.csv("social_marketing.csv", row.names=1)
+
+
+```
+
+
+```{r , results='hide',message=FALSE}
+
+Market_seg = subset(Market_seg, select = -c(spam,adult ,chatter, uncategorized))
+head(Market_seg)
+
+```
+
+
+
+### Running K-means on the Data 
+
+
+```{r  results='hide',message=FALSE}
+
+set.seed(12)
+
+# Center and scale the data
+X = scale(Market_seg, center=TRUE, scale=TRUE)
+
+# Extract the centers and scales from the rescaled data (which are named attributes)
+mu = attr(X,"scaled:center")
+sigma = attr(X,"scaled:scale")
+
+# Run k-means with 6 clusters and 25 starts
+clust1 = kmeans(X, 6, nstart=25)
+
+
+```
+
+### Cluster 1 Importance
+
+```{r}
+#Sorted values of importance of each cluster
+
+sort(clust1$center[1,]*sigma + mu,decreasing=TRUE)
+length(which(clust1$cluster == 1))
+
+```
+### Cluster 2 Importance
+```{r}
+
+sort(clust1$center[2,]*sigma + mu, decreasing=TRUE)
+length(which(clust1$cluster == 2))
+```
+### Cluster 3 Importance
+
+
+```{r}
+
+
+sort(clust1$center[3,]*sigma + mu,decreasing=TRUE)
+length(which(clust1$cluster == 3))
+
+
+```
+
+### Cluster 4 Importance
+```{r}
+
+
+sort(clust1$center[4,]*sigma + mu,decreasing=TRUE)
+length(which(clust1$cluster == 4))
+```
+
+
+### Cluster 5 Importance
+```{r}
+
+sort(clust1$center[5,]*sigma + mu,decreasing=TRUE)
+length(which(clust1$cluster == 5))
+
+```
+
+### Cluster 6 Importance
+```{r}
+
+sort(clust1$center[6,]*sigma + mu,decreasing=TRUE)
+length(which(clust1$cluster == 6))
+
+```
+
+
+
+
+```{r}
+
+# qplot is in the ggplot2 library
+qplot(parenting,family , data=Market_seg, color=factor(clust1$cluster))
+```
+
+
+```{r}
+qplot(cooking, photo_sharing, data=Market_seg, color=factor(clust1$cluster))
+
+```
+
+
+### Running K-Means++
+
+```{r}
+
+
+X = scale(Market_seg, center=TRUE, scale=TRUE)
+
+# Extract the centers and scales from the rescaled data (which are named attributes)
+mu = attr(X,"scaled:center")
+sigma = attr(X,"scaled:scale")
+
+
+clust2 = kmeanspp(X, k=6, nstart=25)
+
+```
+
+### Cluster 1 Importance
+```{r}
+sort(clust2$center[1,]*sigma + mu,decreasing=TRUE)
+length(which(clust2$cluster == 1))
+
+```
+### Cluster 2 Importance
+```{r}
+sort(clust2$center[2,]*sigma + mu,decreasing=TRUE)
+length(which(clust2$cluster == 2))
+
+```
+### Cluster 3 Importance
+```{r}
+sort(clust2$center[3,]*sigma + mu,decreasing=TRUE)
+length(which(clust2$cluster == 3))
+
+```
+
+
+### Cluster 4 Importance
+
+```{r}
+sort(clust2$center[4,]*sigma + mu,decreasing=TRUE)
+length(which(clust2$cluster == 4))
+
+```
+### Cluster 5 Importance
+```{r}
+sort(clust2$center[5,]*sigma + mu,decreasing=TRUE)
+length(which(clust2$cluster == 5))
+```
+
+### Cluster 6 Importance
+```{r}
+sort(clust2$center[6,]*sigma + mu,decreasing=TRUE)
+length(which(clust2$cluster == 6))
+
+```
+
+```{r}
+
+
+# Compare versus within-cluster average distances from the first run
+clust1$withinss
+clust2$withinss
+
+
+sum(clust1$withinss)
+sum(clust2$withinss)
+
+clust1$tot.withinss
+clust2$tot.withinss
+
+clust1$betweenss
+clust2$betweenss
+
+
+
+```
+
+
+
+#PC Correlation 
+
+```{r echo=FALSE, results='hide',message=FALSE}
+# Load data on gene expression in cancer cells
+
+
+library(corrplot)
+library(RColorBrewer)
+library(scales)
+
+library(tidyverse)
+```
+
+```{r}
+M=cor(Market_seg)
+corrplot(M, method="color")
+
+#we can see the correlations are quite high and positive hence we can proceed with PCA
+
+```
+
+
+### We can see the correlation is high so we can run PC to get good results
+
+
+
+```{r}
+
+
+dim(Market_seg)  
+
+pr_Market_seg = prcomp(Market_seg, center = TRUE,scale=TRUE)
+
+summary(pr_Market_seg)
+plot(pr_Market_seg, type='l')
+
+
+
+
+```
+
+
+
+
+```{r}
+
+
+
+
+
+screeplot(pr_Market_seg, type = "l", npcs = 40, main = "Screeplot")
+abline(h = 1, col="red", lty=5)
+legend("topright", legend=c("Eigenvalue = 1"),
+       col=c("red"), lty=5, cex=0.6)
+
+#We see that it is eigen value=1 at 10
+
+cumpro <- cumsum(pr_Market_seg$sdev^2 / sum(pr_Market_seg$sdev^2))
+plot(cumpro[0:40], xlab = "PC #", ylab = "Amount of explained variance", main = "Cumulative variance plot")
+abline(v =10, col="blue", lty=5)
+abline(h = 0.65008, col="blue", lty=5)
+legend("topleft", legend=c("Cut-off @ PC10"),
+       col=c("blue"), lty=5, cex=0.6)
+
+
+#changed h= 0.65008 (Cumulative Proportion of PC10 and c=10)
+
+
+
+
+
+
+
+```
+
+
+```{r}
+
+scores = pr_Market_seg$x
+
+
+
+
+# first, what are PCs themselves?
+loadings = pr_Market_seg$rotation
+
+
+
+```
+
+Obtain value of Scores[1:10]
+
+```{r}
+scores = pr_Market_seg$x
+
+# First for principal components
+comp <- data.frame(scores[,1:10])
+
+```
+
+
+
+### Running PCA with Kmeans++
+
+
+```{r}
+
+
+
+
+
+X = scale(comp, center=TRUE, scale=TRUE)
+
+k <- kmeanspp(X, 6, nstart=25, iter.max=1000)
+
+palette(alpha(brewer.pal(9,'Set1'), 0.5))
+
+mu = attr(X,"scaled:center")
+sigma = attr(X,"scaled:scale")
+
+
+plot(X, col=k$clust, pch=16)
+
+```
+
+### Compare within-cluster average distances of K-means, K-means++ and PCA & K-means++
+
+
+```{r}
+
+
+clust1$withinss
+clust2$withinss
+k$withinss
+sum(clust1$withinss)
+sum(clust2$withinss)
+sum(k$withinss)
+clust1$tot.withinss
+clust2$tot.withinss
+k$tot.withinss
+clust1$betweenss
+clust2$betweenss
+k$betweenss
+
+
+
+
+
+
+```
+
+### We see that PC and k-means++ has the least Sum of Squares Value. 
+
+### Hence we can group clusters as the following :
+
+
+### Cluster 1 Importance
+```{r}
+
+
+
+
+sort(k$center[1,]*sigma + mu,decreasing=TRUE)
+
+
+loadings[,4] %>% sort %>% tail(5)
+loadings[,1] %>% sort %>% tail(5)
+
+
+length(which(k$cluster == 1))
+```
+
+### Cluster 2 Importance  
+
+```{r}
+
+sort(k$center[2,]*sigma + mu,decreasing=TRUE)
+
+loadings[,5] %>% sort %>% tail(5)
+loadings[,1] %>% sort %>% tail(5)
+loadings[,8] %>% sort %>% tail(5)
+loadings[,6] %>% sort %>% tail(5)
+
+
+length(which(k$cluster == 2))
+
+
+```
+
+### Cluster 3 Importance  
+
+
+```{r}
+
+
+sort(k$center[3,]*sigma + mu,decreasing=TRUE)
+loadings[,2] %>% sort %>% tail(5)
+loadings[,5] %>% sort %>% tail(5)
+
+
+length(which(k$cluster == 3))
+
+```
+
+### Cluster 4 Importance  
+
+```{r}
+sort(k$center[4,]*sigma + mu,decreasing=TRUE)
+loadings[,3] %>% sort %>% tail(5)
+loadings[,1] %>% sort %>% tail(5)
+loadings[,4] %>% sort %>% tail(5)
+loadings[,5] %>% sort %>% tail(5)
+
+length(which(k$cluster == 4))
+
+```
+
+### Cluster 5 Importance  
+
+
+```{r}
+
+sort(k$center[5,]*sigma + mu,decreasing=TRUE)
+loadings[,7] %>% sort %>% tail(5)
+loadings[,8] %>% sort %>% tail(5)
+loadings[,3] %>% sort %>% tail(5)
+
+
+length(which(k$cluster == 5))
+```
+
+### Cluster 6 Importance  
+
+
+```{r}
+sort(k$center[6,]*sigma + mu,decreasing=TRUE)
+loadings[,6] %>% sort %>% tail(5)
+loadings[,1] %>% sort %>% tail(5)
+loadings[,3] %>% sort %>% tail(5)
+
+
+
+
+length(which(k$cluster == 6))
+```
+
+
+
+
+
+
+### Conclusion 
+
+
+After running K means on PC, we see that there is high correlation between the six clusters. Here is what we gathered from the results of running a K-means ++ algorithm on the subset of data obtained from PC Analysis.
+
+
+**Middle aged Parents:**  In the first cluster, we see that News and Politics pops up as well as personal fitness and health nutrition. Some other features include parenting, sports_fandom and school. This led us to believe that this cluster could consist mostly of adults who are probably parents and those who follow the news and politics consistently. They tend to focus on nutritional welfare of their kids and are constantly on the look out for new recipes to experiement for their kids. People in this assumed age bracket also tend to be middle aged and hence more conscious about their health & fitness.
+
+
+**Stay at home Mums:**  In the second cluster, we see a high importance for beauty, fashion,cooking ,shopping,photo-sharing and art. We can assume that this cluster caters to young women and mothers. People in this cluster also follow the news, watch films on tv and are interested in art. Online gaming is an interesting topic to have surfaced in this cluster as well.
+
+**Working mothers:** In the third cluster, we see a high importance for religion, parenting and food and school. The same can also be observed for shopping, cooking, fashion and beauty. Thus, we believe that the third cluster is an equally representative mix of the above two clusters. This would fit the role of a working mom whose attention is split usually between her own needs and that of her family.
+
+
+**Media person:**  In the fourth cluster, travel, computers ,politics , automotive have high importance. Fashion, beauty, cooking and photo-sharing also make the list. Thus, this cluster could represent a person who is mostly in the limelight and would like to stay abreast on global trends. They probably travel a lot for their work and hence are on the constant look out for new places and food to explore.
+
+
+**Gen Z young-gun:** In cluster five, we see a high importance for automotive, current events, tv_film. We also see significant weights for fashion, beauty and photo-sharing. This would appear to be the subset of people who are young and are constantly on social media. They need to know what's happening in the world around and make their presence felt on the internet.
+
+
+**College students:**  In cluster six, we see a high impportance for online_gaming, sports_playing, college_uni, school, sports_fandom, cooking and automotive. These are mostly viable topics of interest for students in College. Hence, we believe that this cluster would be an ideal match for College students.
+
+
+
+
+# "Author Attribution  
+
+
+### Loading all the required libraries  
+
+```{r warning=FALSE}
+library(tm) 
+library(magrittr)
+library(slam)
+library(proxy)
+library(kknn)
+library(caret)
+library(randomForest)
+
+```
+### Reading both train and test files together and performing transformations together to deal with the uniformity issue between test and train data.  
+#### Since transformations are performed on the combined wordlist, and then split later into the initial test and train sets, it alleviates the issue of dealing  with words in the test set that we never saw in the training set.  
+
+```{r}
+
+readerPlain = function(fname){
+  readPlain(elem=list(content=readLines(fname)), 
+            id=fname, language='en') }
+
+file_list = Sys.glob('C:/Users/nithi/Downloads/STA380-master/STA380-master/data/ReutersC50/*/*/*.txt')
+reuters=lapply(file_list, readerPlain) 
+
+
+mynames = file_list %>%
+  { strsplit(., '/', fixed=TRUE) } %>%
+  { lapply(., tail, n=2) } %>%
+  { lapply(., paste0, collapse = '') } %>%
+  unlist
+
+# Rename the articles
+names(reuters) = mynames
+
+#Getting the author name to be used later for classification.
+first.word <- function(my.string){
+  unlist(strsplit(my.string, '[0-9]'))[1]
+}
+reuter_name=sapply(mynames, first.word)
+
+```
+
+### Content Transformations and creating a doc-term-matrix  
+#### 1. Convert all words to lower case  
+#### 2. Remove words  
+#### 3. Remove punctuation  
+#### 4. Remove any excess white spaces  
+#### 5. Remove stop words  
+#### 6. Stemming the words to get word roots.  
+
+### Removing all words that doesnt occur in 97% of the documents.  
+
+```{r warning=FALSE}
+documents_raw = Corpus(VectorSource(reuters))
+
+my_documents = documents_raw
+my_documents = tm_map(my_documents, content_transformer(tolower)) # make everything lowercase
+my_documents = tm_map(my_documents, content_transformer(removeNumbers)) # remove numbers
+my_documents = tm_map(my_documents, content_transformer(removePunctuation)) # remove punctuation
+my_documents = tm_map(my_documents, content_transformer(stripWhitespace)) ## remove excess white-space
+my_documents = tm_map(my_documents, content_transformer(removeWords), stopwords("en")) # remove stop words
+my_documents = tm_map(my_documents, content_transformer(stemDocument)) # stemming the document
+
+
+## create a doc-term-matrix
+DTM_reuters = DocumentTermMatrix(my_documents)
+
+DTM_reuters = removeSparseTerms(DTM_reuters, 0.97) # Remove all words that doesnt occur in 97% of the documents.
+
+```
+### Calculating TF-IDF weights of the words and storing the matrix as a data frame object to be fed into a model.  
+### Assigning the author names extracted earlier as the final column of the dataframe "y_train"  
+### Splitting the dataframe into the intial test and train data sets.  
+
+```{r}
+
+tfidf_reuters = weightTfIdf(DTM_reuters) # Calculating TF-IDF
+
+df = as.data.frame(as.matrix(tfidf_reuters)) #Converting to a dataframe object to be fed into a model
+
+#Assigning the author names as the class for each document.
+df$y_train=reuter_name
+df$y_train = factor(df$y_train)
+
+#Splitting into train and test dataframes.
+df_train <- df[1:2500, ]
+df_test <- df[2501:5000, ]
+
+```
+
+### Principal component Analysis to get most important features.  
+#### Almost 75% of variance is explained by taking the 400 components. Hence subsetting the output of PCA to select only 400 componenets.  
+
+```{r}
+X = as.matrix(tfidf_reuters)
+X=X[c(1:2500),]
+
+scrub_cols = which(colSums(X) == 0)
+X = X[,-scrub_cols]
+
+set.seed(123)
+pca_reuters = prcomp(X, scale=TRUE)
+plot(summary(pca_reuters)$importance[3,], xlab = "Components",
+     ylab = "Cumulative % Variance Explained")
+
+train_pca = data.frame(pca_reuters$x)
+train_pca = train_pca[,1:400]
+train_pca$y_train=df_train$y_train
+```
+
+
+### Using KNN model. Input train dataframe has features selected through PCA  
+#### Optimum value of k selected through cross-validation. Here k=2 obtained.  
+#### Model gives an accuracy of 40.4% on the test data.  
+#### KNN using cosine yielded lower accuracy. Hence, went for the default measurement of the KNN function.  
+
+```{r}
+set.seed(123)
+#Choosing the optimum k for KNN using cross validation. We get k=1.
+trControl <- trainControl(method  = "cv",
+                          number  = 5)
+fit <- train(y_train~.,
+             method     = "knn",
+             tuneGrid   = expand.grid(k = c(2,5,8,10)),
+             trControl  = trControl,
+             metric     = "Accuracy",
+             data       = train_pca)
+
+y_test <- df_test$y_train
+df_test$y_train <- NULL
+
+fit
+
+test_pca_knn = predict(pca_reuters, newdata = df_test)
+pca_predicted_knn = predict(fit, test_pca_knn)
+
+conf=confusionMatrix(pca_predicted_knn, y_test )
+conf$overall #Accuracy of the model = 40.4%
+
+```
+
+### Running Random Forest model on the training set with features selected through PCA.  
+#### Accuracy obtained is 54.52%  
+
+```{r}
+set.seed(123)
+pca_classifier = randomForest(train_pca[-401], df_train$y_train)
+
+test_pca = predict(pca_reuters, newdata = df_test)
+pca_predicted = predict(pca_classifier, test_pca)
+
+conf_pca=confusionMatrix(pca_predicted, y_test )
+conf_pca$overall
+
+```
+
+### Running Random Forest Model on the full features and then doing variable selection.  
+####  Random Forest re-run using the selected features yields an accuracy of 63.12%.  
+
+```{r}
+set.seed(123)
+fit_rf <- randomForest(x = df_train[-1282],
+                          y = df_train$y_train)
+predicted_values = predict(fit_rf, df_test)
+
+cf_gen=confusionMatrix(predicted_values, y_test, dnn = c("Predicted", "Actual"))
+
+#Selecting the first 400 important features.
+importanceOrder=order(-fit_rf$importance)
+names=rownames(fit_rf$importance)[importanceOrder]
+names=names[c(1:400)]
+
+
+classifier_new <- randomForest(x = df_train[names],
+                          y = df_train$y_train)
+predicted_values = predict(classifier_new, df_test[names])
+cf=confusionMatrix(predicted_values, y_test, dnn = c("Predicted", "Actual"))
+cf$overall
+
+```
+
+## Conclusion  
+
+
+##### We tried different models using both feature reduction through PCA and feature selection through Random Forest. Out of KNN, Random Forest using PCA feature reduction and Random Forest through feature selection, the final one - "Random Forest model through feature selection" yielded the best result with an **accuracy of 63.12%.**
+
+
+
+# Association Rule Mining  
+
+
+The dataset "Groceries" contains all transactions that consists of items bought in the store by several customers over a period of time. As business analysts, we  hope to identify trends in customer purchase behavior by analyzing their basket data.  
+
+**Association Rule Mining**  
+Association Rule Mining is used when you want to find an association between different objects in a set, find frequent patterns in a transaction database, relational databases or any other information repository. The applications of Association Rule Mining are found in Marketing, Basket Data Analysis (or Market Basket Analysis) in retailing, clustering and classification. It can tell you what items do customers frequently buy together by generating a set of rules called Association Rules. In simple words, it gives you output as rules in form of this then that.  
+
+```{r echo = FALSE, include = FALSE}
+
+library(arules)
+
+library(arulesViz)
+
+library(tidyverse)
+
+library(knitr)
+
+library(ggplot2)
+
+library(lubridate)
+
+library(plyr)
+library(dplyr)
+
+library(tidyverse)
+library(arules)  # has a big ecosystem of packages built around it
+library(arulesViz)
+
+
+```
+
+## Pre-processing data to make the data readable for the Association Rules Mining. 
+
+The functions in the _arules_ package only accept transaction data. Hence the flat file needs to processed to ensure that the input to the functions is as expected. 
+```{r}
+retail = scan('groceries.txt',what="", sep='\n')
+head(retail)
+
+str(retail)
+summary(retail)
+
+groceries = strsplit(retail,",")
+
+groctrans=as(groceries, "transactions")
+summary(groctrans)
+
+```
+Now we want to try to understand which  items in the baskets are most frequently purchased. For this, we plot the itemFrequencyPlot calculated with type 'absolute' and 'relative'. If absolute it will plot numeric frequencies of each item independently. If relative it will plot how many times these items have appeared as compared to others.
+
+```{r}
+# Create an item frequency plot for the top 20 items
+if (!require("RColorBrewer")) {
+  # install color package of R
+install.packages("RColorBrewer")
+#include library RColorBrewer
+library(RColorBrewer)
+}
+itemFrequencyPlot(groctrans,topN=20,type="absolute",col=brewer.pal(8,'Pastel2'), main="Absolute Item Frequency Plot")
+
+itemFrequencyPlot(groctrans,topN=20,type="relative",col=brewer.pal(8,'Pastel2'),main="Relative Item Frequency Plot")
+
+```
+
+
+From the graphs above, it is evident that the top 5 items being purchased are:  
+1. whole milk   
+2. vegetables  
+3. rolls/buns  
+4. soda  
+5. yogurt  
+
+(Basic survival kit!)
+
+The next step is generating rules using the Apriori Algorithm! We can mine rules using **apriori()** function from the **arules** package.
+
+The apriori will take 'groctrans' as the transaction object on which mining is to be applied. parameter will allow you to set min_sup and min_confidence. The default values for parameter are minimum support of 0.001, the minimum confidence of 0.8, maximum of 10 items (maxlen).
+
+We arrived at these values by trial and error. While a lower confidence value helped result in more number of mining rules, we wanted to make sure that we are confident with the predictions we were making from the rules.
+
+```{r}
+association.rules <- apriori(groctrans, parameter = list(supp=0.001, conf=0.8,maxlen=10))
+summary(association.rules)
+
+inspect(association.rules[1:10])
+```
+From the above information, we can deduce that 100% of the customers who bought Rice and sugar also bought Whole Milk.  
+The confidence values of other rules in the above summary are also pretty high (>0.8).
+
+You can also remove redundant rules by creating a subset of unique rules.
+
+```{r}
+# Min Support as 0.005, confidence as 0.8.
+association.rules <- apriori(groctrans, parameter = list(supp=0.001, conf=0.8,maxlen=10))
+summary(association.rules)
+
+inspect(association.rules[1:10])
+
+subset.rules <- which(colSums(is.subset(association.rules, association.rules)) > 1) # get subset rules in vector
+length(subset.rules)  #410 ----> 91
+
+subset.association.rules. <- association.rules[-subset.rules] # remove subset rules.
+
+```
+
+## Finding rules related to a given item:
+
+We can find trends in the way people shop ingredients by finding relationships between the different association rules.  
+
+```{r}
+# What did people buy before buying beer?
+beer.association.rules <- apriori(groctrans, parameter = list(supp=0.001, conf=0.8),appearance = list(default="lhs",rhs="bottled beer"))
+
+inspect(head(beer.association.rules))
+
+# What did people buy before buying milk?
+wholemilk.association.rules <- apriori(groctrans, parameter = list(supp=0.001, conf=0.6),appearance = list(default="lhs",rhs="whole milk"))
+
+inspect(head(wholemilk.association.rules))
+
+# What did people buy along with milk?
+milk.association.rules <- apriori(groctrans, parameter = list(supp=0.001, conf=0.8),appearance = list(lhs="butter",default="rhs"))
+
+inspect(head(milk.association.rules))
+
+```
+
+## Visualizations
+
+A straight-forward visualization of association rules is to use a scatter plot using plot() of the arulesViz package. It uses Support and Confidence on the axes. In addition, third measure Lift is used by default to color (grey levels) of the points.
+
+```{r}
+subRules<-association.rules[quality(association.rules)$confidence>0.4]
+#Plot SubRules
+plot(subRules)
+```
+
+Rules with high lift tend to have low support.
+
+```{r}
+plot(subRules,method="two-key plot")
+```
+
+The two-key plot uses support and confidence on x and y-axis respectively. It uses order for coloring. The order is the number of items in the rule.
+
+### Filtering rules with the highest lift
+
+Here is a parallel coordinates plot for 20 rules. For example, the arrow in red denotes that if a customer purchases red/blush wine they will also buy bottled beer.
+
+
+```{r}
+
+# Filter top 20 rules with highest lift
+subRules2<-head(subRules, n=20, by="lift")
+plot(subRules2, method="paracoord")
+```
+
+
+Given below are a few interactive visualizations to see more details between the rules and the items.
+
+
+```{r}
+plotly_arules(subRules)
+
+top10subRules <- head(subRules, n = 10, by = "confidence")
+
+plot(top10subRules, method = "graph",  engine = "htmlwidget")
+
+```
+
+
+
